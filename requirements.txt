@@ -2,3 +2,4 @@ pymongo
 mysql
 mysql-connector-python
 networkx
+mariadb
