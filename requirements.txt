@@ -1,5 +1,4 @@
 pymongo
 mysql-connector-python
 networkx
-mariadb-server
-mariadb
+
