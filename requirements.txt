@@ -1,4 +1,4 @@
 pymongo
 mysql-connector-python
 networkx
-
+matplotlib
