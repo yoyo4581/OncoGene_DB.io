@@ -1,6 +1,5 @@
 pymongo
 mysql-connector-python
 networkx
-libmariadb-dev
 mariadb-server
 mariadb
