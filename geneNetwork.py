@@ -17,7 +17,7 @@ mycursor = mydb.cursor()
 
 def GeneQuery(Gene_sub, Gene_pool, limit, count, iter):
     time.sleep(0.1)
-    mycursor.execute("select gene1, gene2 FROM ggLink WHERE (gene1=(%s) OR gene2=(%s)) AND NOT linkTypes='text' AND minResCount<50 ORDER BY pairCount DESC LIMIT %s",(Gene_sub, Gene_sub, int(limit)))
+    mycursor.execute("SELECT gene1, gene2 FROM ggLink WHERE (gene1=(%s) OR gene2=(%s)) AND NOT linkTypes='text' AND minResCount<50 ORDER BY pairCount DESC LIMIT %s",(Gene_sub, Gene_sub, int(limit)))
     myresult = mycursor.fetchall()
     print(myresult)
     if count==1:
