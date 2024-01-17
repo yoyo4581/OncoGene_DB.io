@@ -10,6 +10,7 @@ from matplotlib.pyplot import text
 import math
 
 #page layout
+
 st.set_page_config(layout="wide")
 st.title("🐙 OncoGene_db with Graphical Gene Network")
 st.subheader("A curated compilation of cancer data from GEO, Literature Web Parsing, and UCSC gene interaction network")
