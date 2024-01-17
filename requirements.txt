@@ -2,3 +2,4 @@ pymongo
 networkx
 matplotlib
 SQLAlchemy
+mysqlclient
