@@ -3,8 +3,12 @@ import time
 import streamlit as st
 import networkx as nx 
 import matplotlib.pyplot as plt
+import mysql.connector
 
-mycursor = st.connection('mysql', type='sql')
+
+
+conn = mysql.connector.connect(**st.secrets["mysql"])
+mycursor = conn.cursor()
 
 def GeneQuery(Gene_sub, Gene_pool, limit, count, iter):
     time.sleep(0.1)
