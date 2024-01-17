@@ -1,4 +1,5 @@
 pymongo
 networkx
 matplotlib
-mysql.connector
+mysqlclient==x.x.x
+SQLAlchemy==x.x.x
