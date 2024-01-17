@@ -9,6 +9,7 @@ import mysql.connector
 
 conn = mysql.connector.connect(**st.secrets["mysql"])
 mycursor = conn.cursor()
+print("connect")
 
 def GeneQuery(Gene_sub, Gene_pool, limit, count, iter):
     time.sleep(0.1)
