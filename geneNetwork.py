@@ -1,23 +1,14 @@
-import mysql.connector
 from subprocess import Popen, PIPE
 import time
+import streamlit as st
 import networkx as nx 
 import matplotlib.pyplot as plt
 
-mydb = mysql.connector.connect(
-    host = 'genome-mysql.soe.ucsc.edu',
-    user = 'genome',
-    port = 3306,
-    database="hgFixed"
-)
-
-mycursor = mydb.cursor()
-
-
+mycursor = st.connection('mysql', type='sql')
 
 def GeneQuery(Gene_sub, Gene_pool, limit, count, iter):
     time.sleep(0.1)
-    mycursor.execute("SELECT gene1, gene2 FROM ggLink WHERE (gene1=(%s) OR gene2=(%s)) AND NOT linkTypes='text' AND minResCount<50 ORDER BY pairCount DESC LIMIT %s",(Gene_sub, Gene_sub, int(limit)))
+    mycursor.execute("select gene1, gene2 FROM ggLink WHERE (gene1=(%s) OR gene2=(%s)) AND NOT linkTypes='text' AND minResCount<50 ORDER BY pairCount DESC LIMIT %s",(Gene_sub, Gene_sub, int(limit)))
     myresult = mycursor.fetchall()
     print(myresult)
     if count==1:
