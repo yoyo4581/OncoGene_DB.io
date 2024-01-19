@@ -8,6 +8,9 @@ import networkx as nx
 import matplotlib.pyplot as plt
 from matplotlib.pyplot import text
 import math
+from time import sleep
+from streamlit_plotly_events import plotly_events
+import plotly.graph_objects as go
 
 #page layout
 
@@ -81,108 +84,120 @@ with st.sidebar:
 
 #st.write(option1, option2, option3, option4, option5)
 
-col_part1, col_part2 = st.columns([3,2])
+#col_part1, col_part2 = st.columns([3,2])
 
 abs_dict = {}
 #creates the main data frame and expander widget
-with col_part1:
-    current_selection = []
-    with st.container():
-        st.dataframe(st.session_state.df.loc[:, ~df.columns.isin(["Primary Cancer Type", "Secondary Cancer Type", "Classification", "Location", "Method"])])
+#with col_part1:
+current_selection = []
+with st.container():
+    st.dataframe(st.session_state.df.loc[:, ~df.columns.isin(["Primary Cancer Type", "Secondary Cancer Type", "Classification", "Location", "Method"])])
 
-    buttons = []
+buttons = []
 
-    if 'expander' not in st.session_state:
-        st.session_state['expander']= False
+if 'Gene Profile' not in st.session_state:
+    st.session_state['Gene Profile']= False
 
-    with st.expander('expander'):
+with st.expander('Gene Profile'):
 
-        abstract = st.session_state.df['Abstract'].tolist()
-        abstract = [x for x in abstract if x !=[]]
+    abstract = st.session_state.df['Abstract'].tolist()
+    abstract = [x for x in abstract if x !=[]]
 
-        body = st.session_state.df['Body'].tolist()
-        body = [x for x in body if x !=[]]
+    body = st.session_state.df['Body'].tolist()
+    body = [x for x in body if x !=[]]
 
-        keywords = st.session_state.df['Keywords'].tolist()
-        keywords = [x for x in keywords if x !=[]]
+    keywords = st.session_state.df['Keywords'].tolist()
+    keywords = [x for x in keywords if x !=[]]
 
-        abbrev = st.session_state.df['Abbreviations'].tolist()
-        abbrev = [x for x in abbrev if x !=[]]
+    abbrev = st.session_state.df['Abbreviations'].tolist()
+    abbrev = [x for x in abbrev if x !=[]]
 
-        def plotCall(string):
-            st.session_state['current_state'] = string
+    def plotCall(string):
+        st.session_state['current_state'] = string
 
-        generate_genes = st.checkbox("generate Genes", key='generateGenes')
-        gene_dict = {}
+    generate_genes = st.checkbox("generate Genes", key='generateGenes')
+    gene_dict = {}
 
-        if 'generateGenes' not in st.session_state:
-            st.session_state.generateGenes = False
+    if 'generateGenes' not in st.session_state:
+        st.session_state.generateGenes = False
 
-        #keeps tract of the frequency at which each gene pops up across contexts
-        if generate_genes:
-            for abs in abstract:
-                if str(abs) !='nan':
-                    for ab in abs:
-                        if str(ab) not in gene_dict:
-                            gene_dict[str(ab)] = 1
-                        else:
-                            gene_dict[str(ab)]+=1
-            for bod in body:
-                if str(bod) !='nan':
-                    for item_body in bod:
-                        if str(item_body) not in gene_dict:
-                            gene_dict[str(item_body)] = 1
-                        else:
-                            gene_dict[str(item_body)]+=1
-            for keyw in keywords:
-                if str(keyw) !='nan':
-                    for key in keyw:
-                        if str(key) not in gene_dict:
-                            gene_dict[str(key)] = 1
-                        else:
-                            gene_dict[str(key)]+=1
-            for abr in abbrev:
-                if str(abr) !='nan':
-                    for item_abr in abr:
-                        if str(item_abr) not in gene_dict:
-                            gene_dict[str(item_abr)] = 1
-                        else:
-                            gene_dict[str(item_abr)]+=1
-            abs_dict = dict(sorted(gene_dict.items(), key=operator.itemgetter(1), reverse=True))
+    #keeps tract of the frequency at which each gene pops up across contexts
+    if generate_genes:
+        for abs in abstract:
+            if str(abs) !='nan':
+                for ab in abs:
+                    if str(ab) not in gene_dict:
+                        gene_dict[str(ab)] = 1
+                    else:
+                        gene_dict[str(ab)]+=1
+        for bod in body:
+            if str(bod) !='nan':
+                for item_body in bod:
+                    if str(item_body) not in gene_dict:
+                        gene_dict[str(item_body)] = 1
+                    else:
+                        gene_dict[str(item_body)]+=1
+        for keyw in keywords:
+            if str(keyw) !='nan':
+                for key in keyw:
+                    if str(key) not in gene_dict:
+                        gene_dict[str(key)] = 1
+                    else:
+                        gene_dict[str(key)]+=1
+        for abr in abbrev:
+            if str(abr) !='nan':
+                for item_abr in abr:
+                    if str(item_abr) not in gene_dict:
+                        gene_dict[str(item_abr)] = 1
+                    else:
+                        gene_dict[str(item_abr)]+=1
+        abs_dict = dict(sorted(gene_dict.items(), key=operator.itemgetter(1), reverse=True))
 
-            five_genes = [gene for gene in abs_dict.keys() if abs_dict[gene]>=5]
-            four_genes = [gene for gene in abs_dict.keys() if abs_dict[gene]==4]
-            three_genes = [gene for gene in abs_dict.keys() if abs_dict[gene]==3]
-            two_genes = [gene for gene in abs_dict.keys() if abs_dict[gene]==2]
-            one_genes = [gene for gene in abs_dict.keys() if abs_dict[gene]==1]
+        gene_names = [gene for gene in abs_dict.keys()]
+        gene_freq = [abs_dict[name] for name in gene_names]
 
-            #groups and displays genes based on their frequency as buttons of different sizes
-            col5, col4, col3, col2, col1 = st.columns([5,4,3,2,2])
-            with col5:
-                st.markdown("frequency >5")
-                for gene in five_genes:
-                    buttons.append(st.button(str(gene),  on_click=plotCall, args=[str(gene)], use_container_width=True))
-            with col4:
-                st.markdown("frequency = 4")
-                for gene in four_genes:
-                    buttons.append(st.button(str(gene),  on_click=plotCall, args=[str(gene)], use_container_width=True))
-            with col3:
-                st.markdown("frequency = 3")
-                for gene in three_genes:
-                    buttons.append(st.button(str(gene),  on_click=plotCall, args=[str(gene)], use_container_width=True))
-            with col2:
-                st.markdown("frequency = 2")
-                for gene in two_genes:
-                    buttons.append(st.button(str(gene),  on_click=plotCall, args=[str(gene)], use_container_width=True))
-            with col1:
-                st.markdown("freq= 1")
-                for gene in one_genes:
-                    buttons.append(st.button(str(gene),  on_click=plotCall, args=[str(gene)], use_container_width=True))
+
+        empty = st.empty()
+        with empty.container():
+            fig = go.Figure(data=[go.Pie(labels=gene_names, values=gene_freq, hole=0.3)])
+            fig.update_traces(hoverinfo='label+percent+name', textinfo='none')
+            fig.update_layout(uniformtext_minsize=12, margin=dict(t=0, b=0, l=0, r=0),uniformtext_mode='hide')
+            selected_points = plotly_events(fig)
+
+        def updatePi(geneList):
+            # Reset figure
+            FIG = go.Figure()
+            indexList = [gene_names.index(i) for i in geneList]
+            zero_array = [0]*len(gene_freq)
+            zero_array[indexList[-1]] = 0.6  #last one in list will be selected
+            for i in indexList:
+                if i != indexList[-1]:
+                    zero_array[i] = 0.2
+    
+            Gene_select = geneList[-1]
+            st.text(zero_array)
+            # Streamlit
+            with empty.container():
+                st.write("d")
+                FIG = go.Figure(data=[go.Pie(labels=gene_names, values=gene_freq, pull=zero_array, hole=0.3)])
+                FIG.update_traces(hoverinfo='label+percent+name', textinfo='none')
+                FIG.update_layout(uniformtext_minsize=12, margin=dict(t=0, b=0, l=0, r=0))
+                selected_points = plotly_events(FIG)
+                plotCall(Gene_select)
+            sleep(1)
+
+        if selected_points:
+            point = selected_points[0]['pointNumber']
+            if 'selected' not in st.session_state or st.session_state['selected'] != point:
+                st.session_state['selected'] = point
+                st.write(st.session_state['selected'])
+                updatePi([gene_names[point]])
 
 #method to check and display if a gene belongs in the gene pool, or it is new
 #also checks if there is gene interaction data for the gene term
 def check_result(result):
     covered = []
+    in_parse = []
     if result:
         sub_col1, sub_col2 = st.columns([1,1])
         with sub_col1:
@@ -194,9 +209,11 @@ def check_result(result):
                 if tup[0] in abs_dict.keys() and tup[0] not in covered:
                     st.markdown(f":red[{str(tup[0])}] \n")
                     covered.append(tup[0])
+                    in_parse.append(tup[0])
                 if tup[1] in abs_dict.keys() and tup[1] not in covered:
                     st.markdown(f":red[{str(tup[1])}] \n")
                     covered.append(tup[1])
+                    in_parse.append(tup[1])
             with sub_col2:
                 if tup[0] not in abs_dict.keys() and tup[0] not in covered:
                     st.markdown(str(tup[0]))
@@ -204,11 +221,17 @@ def check_result(result):
                 if tup[1] not in abs_dict.keys() and tup[1] not in covered:
                     st.markdown(str(tup[1]))
                     covered.append(tup[1])
+        in_parse.append(st.session_state['current_state'])
+        updatePi(in_parse)
+
     else:
         st.subheader('No Gene data')
 
 #generates graph and information about genes in gene network. Also has a button to download gene network.
-with col_part2:
+#with col_part2:
+if 'Network Search' not in st.session_state:
+    st.session_state['Network Search']= False
+with st.expander('Network Search'):
     if 'current_state' in st.session_state:
         st.header('Subject selected: '+st.session_state['current_state'])
         values = st.slider('Select a number of neighbors to consider in search', 0, 10, 5)
