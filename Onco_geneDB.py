@@ -160,7 +160,7 @@ with st.expander('Gene Profile'):
         empty = st.empty()
         with empty.container():
             fig = go.Figure(data=[go.Pie(labels=gene_names, values=gene_freq, hole=0.3)])
-            fig.update_traces(hoverinfo='label+percent+name', textinfo='none')
+            fig.update_traces(hoverinfo='label+value+name', textinfo='none')
             fig.update_layout(uniformtext_minsize=12, margin=dict(t=0, b=0, l=0, r=0),uniformtext_mode='hide')
             selected_points = plotly_events(fig)
 
@@ -180,7 +180,7 @@ with st.expander('Gene Profile'):
             with empty.container():
                 st.write("d")
                 FIG = go.Figure(data=[go.Pie(labels=gene_names, values=gene_freq, pull=zero_array, hole=0.3)])
-                FIG.update_traces(hoverinfo='label+percent+name', textinfo='none')
+                FIG.update_traces(hoverinfo='label+value+name', textinfo='none')
                 FIG.update_layout(uniformtext_minsize=12, margin=dict(t=0, b=0, l=0, r=0))
                 selected_points = plotly_events(FIG)
                 plotCall(Gene_select)
@@ -235,6 +235,9 @@ with st.expander('Network Search'):
     if 'current_state' in st.session_state:
         st.header('Subject selected: '+st.session_state['current_state'])
         values = st.slider('Select a number of neighbors to consider in search', 0, 10, 5)
+        expansiveText = st.checkbox("Expansive Text", key='expandText')
+        if 'expandText' not in st.session_state:
+            st.session_state.expandText = False
         generate_graph = st.button('Generate Graph')
 
         #once the scope has been set and the generate graph button is clicked, then send an sql query
@@ -247,25 +250,34 @@ with st.expander('Network Search'):
                     Graph = geneNetwork.Graphit(result)
                     d = dict(Graph.degree)
                     fig, ax = plt.subplots()
+                
                     #try different graph layout if information can be displayed in a simple planar layout 
                     try:
                         pos = nx.planar_layout(Graph)
                     except:
                         st.write("Data not planar, showing spring_layout")
                         pos = nx.spring_layout(Graph)
-                        nx.draw(Graph, pos=pos, with_labels=False, node_size = [(v+math.log(v))*100 for v in d.values()])
-                        for node, (x,y) in pos.items():
-                            text(x,y, node, fontsize=math.log(d[node]+1)*8,ha='center', va='center')
+                        if expansiveText:
+                            nx.draw(Graph, pos=pos, with_labels=False, node_size = [(v+math.log(v))*100 for v in d.values()])
+                            for node, (x,y) in pos.items():
+                                text(x,y, node, fontsize=math.log(d[node]+1)*8,ha='center', va='center')
+                        else:
+                            nx.draw(Graph, pos=pos, with_labels=False)
+                            for node, (x,y) in pos.items():
+                                text(x,y, node,ha='center', va='center')
                         st.pyplot(fig)
                         check_result(result)
                     else: #otherwise display information in spring-layout
-                        nx.draw(Graph, pos=pos, with_labels=False, node_size = [(v+math.log(v))*100 for v in d.values()])
-                        for node, (x,y) in pos.items():
-                            text(x,y, node, fontsize=math.log(d[node]+1)*8, ha='center', va='center')
+                        if expansiveText:
+                            nx.draw(Graph, pos=pos, with_labels=False, node_size = [(v+math.log(v))*100 for v in d.values()])
+                            for node, (x,y) in pos.items():
+                                text(x,y, node, fontsize=math.log(d[node]+1)*8, ha='center', va='center')
+                        else:
+                            nx.draw(Graph, pos=pos, with_labels=False)
+                            for node, (x,y) in pos.items():
+                                text(x,y, node, ha='center', va='center')
                         st.pyplot(fig)
                         check_result(result)
-                        net = convert_Network(result)
-                        button_Net = st.download_button('Download Network', net, "Netfile.csv", "text/csv", key='download-csv2')
                     net = convert_Network(result)
                     button_Net = st.download_button('Download Network', net, "Netfile.csv", "text/csv", key='download-csv1')
                 else: #if there is no valid gene interaction data display a message for the user
